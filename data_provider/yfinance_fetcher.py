@@ -1063,7 +1063,7 @@ class YfinanceFetcher(BaseFetcher):
             return None
 
     def get_stock_name(self, stock_code: str, *, allow_network: bool = True) -> Optional[str]:
-        """Resolve display name for supported US, HK, and JP/KR/TW symbols via Yahoo Finance."""
+        """Resolve display name for supported US, HK, JP/KR/TW and ASX symbols via Yahoo Finance."""
         cache_key = (stock_code or "").strip().upper()
         if not cache_key:
             return None
@@ -1095,6 +1095,7 @@ class YfinanceFetcher(BaseFetcher):
             or _is_hk_market(lookup_code)
             or self._is_jp_kr_suffix_stock(lookup_code)
             or self._is_tw_suffix_stock(lookup_code)
+            or is_suffix_market_symbol(lookup_code, "au")
         ):
             return None
 

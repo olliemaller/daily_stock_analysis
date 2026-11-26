@@ -54,3 +54,19 @@ def test_realtime_failure_only_tries_yahoo():
     with patch.object(manager, '_try_fetcher_quote', return_value=None) as fetch:
         assert manager.get_realtime_quote('A2M.AX') is None
     assert [c.args[1] for c in fetch.call_args_list] == ['YfinanceFetcher']
+
+
+def test_yfinance_resolves_asx_stock_names_and_rejects_bad_suffixes():
+    from unittest.mock import MagicMock, patch
+
+    from data_provider.yfinance_fetcher import YfinanceFetcher
+
+    fetcher = YfinanceFetcher()
+    ticker = MagicMock()
+    ticker.info = {"shortName": "BHP Group Limited"}
+    with patch("yfinance.Ticker", return_value=ticker) as yf_ticker:
+        assert fetcher.get_stock_name("bhp.ax") == "BHP Group Limited"
+        yf_ticker.assert_called_once_with("BHP.AX")
+        assert fetcher.get_stock_name("TOOLONG7.AX") is None
+        assert fetcher.get_stock_name("BHP.AX", allow_network=False) == "BHP Group Limited"  # cached
+        assert yf_ticker.call_count == 1
